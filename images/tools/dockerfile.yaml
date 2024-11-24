@@ -1,0 +1,36 @@
+FROM registry.access.redhat.com/ubi9:latest
+
+ARG OC_VERSION=4.16
+ARG HELM_VERSION=3.16.3
+ARG YQ_VERSION=4.40.3
+ARG KUSTOMIZE_VERSION=5.0.3
+ARG TKN_VERSION=0.38.1
+
+ENV OC_BASE_URL="https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable-${OC_VERSION}/openshift-client-linux.tar.gz"
+ENV HELM_BASE_URL="https://get.helm.sh"
+ENV YQ_BASE_URL="https://github.com/mikefarah/yq/releases/download"
+ENV KUSTOMIZE_BASE_URL="https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_amd64.tar.gz"
+ENV TKN_BASE_URL="https://github.com/tektoncd/cli/releases/download/v${TKN_VERSION}/tkn_${TKN_VERSION}_Linux_x86_64.tar.gz"
+
+WORKDIR /app
+RUN  dnf -y install --best --allowerasing --nodocs --noplugins --setopt=install_weak_deps=0 \
+        bash findutils bind-utils curl gzip tar bzip2 vim-minimal git skopeo jq \
+  && dnf upgrade -y --refresh --best --nodocs --noplugins --setopt=install_weak_deps=0 \
+  && dnf clean all \
+  && \
+  curl -sSL -o - $TKN_BASE_URL | tar -xz && install -m 755 tkn /usr/bin/tkn && \
+    echo -e "\n=> tkn version:\n$(tkn version)" && \
+  curl -sSL -o - $OC_BASE_URL | tar -xz && install -m 755 oc /usr/bin/oc && ln -s /usr/bin/oc /usr/bin/kubectl && \
+    echo -e "\n=> oc version:\n$(oc version --client)" && \
+    echo -e "\n=> kubectl version:\n$(kubectl version --client)" && \
+  curl -sSL -o - ${KUSTOMIZE_BASE_URL} | tar -xz && install -m 755 kustomize /usr/bin/kustomize && \
+    echo -e "\n=> kustomize version:\n$(kustomize version)" && \
+  curl -sSL -o - ${HELM_BASE_URL}/helm-v${HELM_VERSION}-linux-amd64.tar.gz | tar --strip-components=1  -xz && install -m 755 helm /usr/bin/helm && \
+    echo -e "\n=> helm version:\n$(helm version)"  && \
+  curl -sSL -o - ${YQ_BASE_URL}/v${YQ_VERSION}/yq_linux_amd64.tar.gz | tar -xz && install -m 755 yq_linux_amd64 /usr/bin/yq && \
+    echo -e "\n=> yq version:\n$(yq --version)" && \
+  rm -rf /app/* && chgrp 0 /app && chmod 775 /app
+
+USER 1975
+
+CMD [ "/usr/bin/tkn" ]
