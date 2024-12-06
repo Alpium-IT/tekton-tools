@@ -7,3 +7,9 @@ resources:
 - namespace.yaml
 - tools-job.yaml
 - tools-deployment.yaml
+
+# update the image name and tag
+images:
+- name: tekton-tools
+  newName: image-registry.openshift-image-registry.svc:5000/tekton-images/tekton-tools
+  newTag: "1.0"

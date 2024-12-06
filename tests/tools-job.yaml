@@ -9,7 +9,7 @@ spec:
         app: test-tekton-tools
     spec:
       containers:
-      - image: image-registry.openshift-image-registry.svc.cluster.local:5000/tekton-images/tekton-tools:1.0
+      - image: tekton-tools
         name: test-tekton-tools
         args:
         - sh
