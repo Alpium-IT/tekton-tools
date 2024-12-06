@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: test-tekton-tools
+spec:
+  template:
+    metadata:
+      labels:
+        app: test-tekton-tools
+    spec:
+      containers:
+      - image: image-registry.openshift-image-registry.svc.cluster.local:5000/tekton-images/tekton-tools:1.0
+        name: test-tekton-tools
+        args:
+        - sh
+        - -c
+        - |
+          echo -e "\n** Tekton:\n$(tkn version)"
+          echo -e "\n** oc:\n$(oc version --client)"
+          echo -e "\n** kubectl:\n$(kubectl version)"
+          echo -e "\n** kustomize:\n$(kustomize version)"
+          echo -e "\n** Helm:\n$(helm version)"
+          echo -e "\n** jq:\n$(jq -V)"
+          echo -e "\n** yq:\n$(yq --version)"
+          echo "tests complete."
+        resources:
+          limits:
+            memory: "32Mi"
+            cpu: "100m"
+          requests:
+            memory: "4Mi"
+            cpu: "10m"
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
+          runAsNonRoot: true
+          seccompProfile:
+            type: RuntimeDefault
+      restartPolicy: Never
+      deletionGracePeriodSeconds: 1

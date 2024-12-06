@@ -14,12 +14,13 @@ metadata:
   labels:
     build: tekton-tools
   name: tekton-tools
+  namespace: tkn-tools
 spec:
   failedBuildsHistoryLimit: 1
   output:
     to:
       kind: ImageStreamTag
-      name: tekton-tools:latest
+      name: tekton-tools:1.0
   postCommit: {}
   resources: {}
   runPolicy: Serial

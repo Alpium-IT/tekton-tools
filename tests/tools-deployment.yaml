@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: tests
+  name: test-tekton-tools
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tests
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: tests
+    spec:
+      deletionGracePeriodSeconds: 1
+      containers:
+      - image: image-registry.openshift-image-registry.svc.cluster.local:5000/tekton-images/tekton-tools:1.0
+        name: tekton-tools
+        args:
+        - sleep
+        - "infinity"
+        resources: {}
